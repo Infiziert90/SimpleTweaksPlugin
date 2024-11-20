@@ -11,8 +11,6 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using InteropGenerator.Runtime;
 using Newtonsoft.Json;
@@ -83,8 +81,8 @@ public abstract class BaseTweak {
     public IEnumerable<string> Tags => TweakTagsAttribute?.Tags ?? [];
     internal bool ForceOpenConfig { private get; set; }
 
-    public TweakProvider TweakProvider { get; private set; } = null;
-    public SubTweakManager TweakManager { get; private set; } = null;
+    public TweakProvider TweakProvider { get; private set; }
+    public SubTweakManager TweakManager { get; private set; }
 
     public virtual bool CanLoad => true;
 
@@ -285,7 +283,12 @@ public abstract class BaseTweak {
             DrawCommon();
         }
 
-        if (hasChanged && Enabled) ConfigChanged();
+        if (hasChanged && Enabled) {
+            ConfigChanged();
+            if (TweakAutoConfigAttribute is not NoAutoConfig && TweakAutoConfigAttribute.AutoSaveLoad && TweakAutoConfigAttribute.SaveOnChange) {
+                AutoSaveConfig();
+            }
+        }
         return configTreeOpen;
     }
 
@@ -546,7 +549,7 @@ public abstract class BaseTweak {
     
     protected virtual void Setup() { }
 
-    private bool signatureHelperInitialized = false;
+    private bool signatureHelperInitialized;
 
     private void AutoLoadConfig() {
         SimpleLog.Verbose($"[{Key}] AutoLoading Config");

@@ -19,7 +19,9 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.Interop;
+using Lumina.Excel.Sheets;
 using SimpleTweaksPlugin.Debugging;
+using Action = System.Action;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace SimpleTweaksPlugin.Utility;
@@ -32,7 +34,7 @@ public unsafe class Common {
     public static Utf8String* LastCommand { get; private set; }
 
     public static uint ClientStructsVersion => CsVersion.Value;
-    private static readonly Lazy<uint> CsVersion = new(() => uint.TryParse(FFXIVClientStructs.ThisAssembly.Git.Commits, out var v) ? v : 0);
+    private static readonly Lazy<uint> CsVersion = new(() => (uint?)typeof(FFXIVClientStructs.ThisAssembly).Assembly.GetName().Version?.Build ?? 0U);
 
     public static event Action FrameworkUpdate;
 
@@ -73,7 +75,7 @@ public unsafe class Common {
 
     public static T* GetUnitBase<T>(string name = null, int index = 1) where T : unmanaged {
         if (string.IsNullOrEmpty(name)) {
-            var attr = (Addon)typeof(T).GetCustomAttribute(typeof(Addon));
+            var attr = (AddonAttribute) typeof(T).GetCustomAttribute(typeof(AddonAttribute));
             if (attr != null) {
                 name = attr.AddonIdentifiers.FirstOrDefault();
             }
@@ -87,7 +89,7 @@ public unsafe class Common {
     public static bool GetUnitBase<T>(out T* unitBase, string name = null, int index = 1) where T : unmanaged {
         unitBase = null;
         if (string.IsNullOrEmpty(name)) {
-            var attr = (Addon)typeof(T).GetCustomAttribute(typeof(Addon));
+            var attr = (AddonAttribute) typeof(T).GetCustomAttribute(typeof(AddonAttribute));
             if (attr != null) {
                 name = attr.AddonIdentifiers.FirstOrDefault();
             }
@@ -321,6 +323,37 @@ public unsafe class Common {
         return node != null;
     }
 
+    public static AtkResNode* GetNodeByIDChain(AtkResNode* node, params int[] ids)
+    {
+        if (node == null || ids.Length <= 0)
+            return null;
+
+        if (node->NodeId == ids[0]) {
+            if (ids.Length == 1)
+                return node;
+
+            var newList = new List<int>(ids);
+            newList.RemoveAt(0);
+
+            var childNode = node->ChildNode;
+            if (childNode != null)
+                return GetNodeByIDChain(childNode, [.. newList]);
+
+            if ((int)node->Type >= 1000) {
+                var componentNode = node->GetAsAtkComponentNode();
+                var component = componentNode->Component;
+                var uldManager = component->UldManager;
+                childNode = uldManager.NodeList[0];
+                return childNode == null ? null : GetNodeByIDChain(childNode, [.. newList]);
+            }
+
+            return null;
+        }
+
+        var sibNode = node->PrevSiblingNode;
+        return sibNode != null ? GetNodeByIDChain(sibNode, ids) : null;
+    }
+
     public static void Shutdown() {
         if (ThrowawayOut != null) {
             Marshal.FreeHGlobal(new IntPtr(ThrowawayOut));
@@ -439,4 +472,6 @@ public unsafe class Common {
     public static Extensions.PointerReadOnlySpanUnboxer<AtkResNode> GetNodeList(AtkUldManager* uldManager) => new ReadOnlySpan<Pointer<AtkResNode>>(uldManager->NodeList, uldManager->NodeListCount).Unbox();
     public static Extensions.PointerReadOnlySpanUnboxer<AtkResNode> GetNodeList(AtkUnitBase* unitBase) => GetNodeList(&unitBase->UldManager);
     public static Extensions.PointerReadOnlySpanUnboxer<AtkResNode> GetNodeList(AtkComponentBase* component) => GetNodeList(&component->UldManager);
+
+    public static string DefaultStringIfEmptyOrWhitespace(string str, string defaultString = "") => string.IsNullOrWhiteSpace(str) ? defaultString : str;
 }

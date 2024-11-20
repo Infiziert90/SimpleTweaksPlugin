@@ -16,6 +16,11 @@
   Automatically locks action bars when certain conditions are met.
 
 
+- **Auto Refresh Material List**
+
+  Automatically refreshes the raw material list and recipe tree windows.
+
+
 - **Bait Command**
 
   Adds /bait to switch fishing baits.
@@ -193,7 +198,12 @@
 
 - **Leave Duty Command**
 
-  Adds a command to leave the currenty duty. /leaveduty
+  Adds a command to leave the current duty.
+
+
+- **Leveling Dungeon Command**
+
+  Adds a command to open the highest level leveling dungeon available for your level.
 
 
 - **Long Veil**
@@ -372,6 +382,11 @@
   Allows you to change the font size for the chat windows beyond the default limits, and allows docked chat tabs to keep their font size separate from the main tab.
 
 
+- **Print Search Comment**
+
+  Prints the Search Comment of people, that get inspected, into the chat.
+
+
 - **Rename Chat Tabs**
 
   Allows renaming the General and Battle tabs in the chat window.
@@ -457,6 +472,11 @@
   Show a preview image for mounts, minions and hairstyles.
 
 
+- **Show Collectable Rewards**
+
+  Shows rewards when viewing a collectable delivery item.
+
+
 - **Show Desynthesis Skill**
 
   Shows your current desynthesis level when viewing a desynthesizable item.
@@ -528,6 +548,11 @@
 - **Always Yes**
 
   Sets the default action in dialog boxes to yes when using confirm (num 0).
+
+
+- **Auto Focus Market Board Item Search**
+
+  Automatically focus the item search when opening the market board.
 
 
 - **Auto Focus Recipe Search**
@@ -762,6 +787,11 @@
 - **Remove Quest Marker Limit**
 
   Allow the map and minimap to display markers for more than 5 active quests.
+
+
+- **Rename Free Company Chest Tabs**
+
+  Allows renaming of each tab in the Free Company chest.
 
 
 - **Reposition Target Castbar Text**
